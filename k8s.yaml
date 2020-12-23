@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <PROJECT>
+  namespace: default
+  labels:
+    app: <PROJECT>
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: <PROJECT>
+  template:
+    metadata:
+      labels:
+        app: <PROJECT>
+    spec:
+      restartPolicy: Always
+      imagePullSecrets:
+        - name: myreg
+      containers:
+      - image: <IMAGE>:<IMAGE_TAG>
+        name: <PROJECT>
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: api
+      imagePullSecrets:
+      - name: aliyun-registry
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: <PROJECT>
+  namespace: default
+spec:
+  selector:
+    app: <PROJECT>
+  type:  ClusterIP
+  ports:
+  - name: api-port
+    port: 8080
+    targetPort:  api
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: <PROJECT>
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: <PROJECT>.liz.com
+    http:
+      paths:
+      - path:
+        backend:
+          serviceName: <PROJECT>
+          servicePort: 8080
