@@ -1,4 +1,4 @@
-@Library('shared-library') _
+@Library('myshare') _
 build([
-    mvn_para:"clean package -Dmaven.test.skip=true"
+    mvn:"clean package -Dmaven.test.skip=true"
     ])
